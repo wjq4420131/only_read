@@ -1,0 +1,61 @@
+LANG=""
+
+
+#echo "**************************** fenfa************************"
+
+
+#gen lu jing da xiao
+
+df -h | grep '/' | awk 'NR==1' | awk {'print $5'}
+
+
+megafile=`ps -A |grep megasserver| awk '{print $1}'`
+echo "Mega pid:" $megafile
+
+
+mega_cwd_path=`ls -l /proc/${megafile} | grep "cwd ->" | grep -v "grep" | awk '{print $NF}'`
+echo "Mega path: " $mega_cwd_path
+
+
+pidfile=`ps -A |grep "Sto"| awk '{print $1}'`
+echo "sto pid:" $pidfile
+
+
+cwd_path=`ls -l /proc/${pidfile} | grep "cwd ->" | grep -v "grep" | awk '{print $NF}'`
+echo "store path: " $cwd_path
+
+
+Schemes=$(tail -n 5 $cwd_path/state.txt |head -n 1 | awk 'NR==1' | awk '{ print $1}' |cut -d: -f 2)
+echo "Schemes:"  $Schemes
+
+Records=$(tail -n 5 $cwd_path/state.txt |head -n 1 | awk 'NR==1' | awk '{ print $2}' |cut -d: -f 2)
+echo "Records:"  $Records
+
+
+Channels=$(tail -n 5 $cwd_path/state.txt |head -n 1 | awk 'NR==1' | awk '{ print $3}' |cut -d: -f 2)
+echo "Channels:"  $Channels
+
+
+core=$(find $cwd_path -name "core.*" | wc -l)
+echo "core:" $core
+
+
+pathfile=$(sed -i 's/"//g' | awk 'BEGIN{RS="<!--|-->"}NR%2' $cwd_path/config/config.xml | grep 'PATH' | awk '{print $3}')
+
+
+for i in $pathfile
+do
+    yinhao=$(echo $i | sed 's/"//g')
+    ver=$(echo $yinhao | sed 's/\r//g')
+    touch $ver/test.txt
+    if [ $? -eq 0 ]
+    then
+        echo $ver  "ok"
+    else
+        echo $ver  "read_only"
+    fi
+done
+
+
+
+

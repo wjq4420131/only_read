@@ -1,0 +1,3 @@
+LANG=""
+
+ucli dg_get_disk_info
